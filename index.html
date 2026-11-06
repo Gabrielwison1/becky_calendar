@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeckyNails & More - December 2026 Mobile Story Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas for HD image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#FDF2FA',
+                            100: '#FAD5EF',
+                            200: '#F7B3E3',
+                            300: '#EE7FCC',
+                            400: '#E146AF',
+                            500: '#C51390',
+                            600: '#9D0A6E',
+                            700: '#800858',
+                            800: '#640947',
+                            900: '#3D042B',
+                            950: '#1C0214'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        script: ['Great Vibes', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0308;
+            color: #f3f4f6;
+        }
+
+        /* 9:16 Canvas Aspect Ratio (1080 x 1920 canvas scaling container) */
+        .story-canvas {
+            width: 1080px;
+            height: 1920px;
+            background: linear-gradient(135deg, #160412 0%, #2b0623 45%, #180313 100%);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+            box-sizing: border-box;
+        }
+
+        .watermark-overlay {
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Fix text distortion & vertical clipping during HTML2Canvas render */
+        .card-title-fix {
+            font-size: 28px !important;
+            line-height: 100px !important;
+            height: auto !important;
+            display: block !important;
+        }
+
+        .service-text-fix {
+            font-size: 24px !important;
+            line-height: 22px !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #160412;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #800858;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C51390;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-neutral-950/90 backdrop-blur-md border-b border-brand-900/60 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div id="top-bar-logo"
+                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-700 via-brand-500 to-pink-400 flex items-center justify-center font-serif text-white font-bold text-xl shadow-lg shadow-brand-600/40 overflow-hidden border border-brand-300/40">
+                    B
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white tracking-wide">BeckyNails & More</h1>
+                    <p class="text-xs text-brand-300 font-medium">WhatsApp Status & Story Slide Generator (1080×1920)
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <button onclick="resetDefaults()"
+                    class="flex-1 md:flex-initial px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-xs text-neutral-300 font-semibold border border-neutral-800 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+                </button>
+                <button onclick="exportAsImage()" id="export-btn"
+                    class="flex-1 md:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-500 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg shadow-brand-600/40 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> Download Story Slide (.PNG)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Studio Layout -->
+    <main class="flex-1 max-w-[1750px] w-full mx-auto p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT PANEL: Dynamic Controls, Slide Selector & Data Editor (4 Cols) -->
+        <aside
+            class="lg:col-span-4 bg-neutral-950/95 rounded-2xl border border-brand-900/50 p-4 sm:p-5 flex flex-col gap-5 h-[86vh] lg:sticky lg:top-20 overflow-hidden shadow-2xl">
+
+            <!-- Navigation Tabs -->
+            <div class="flex bg-neutral-900 rounded-xl p-1 border border-neutral-800 shrink-0">
+                <button id="tab-packages-btn" onclick="switchTab('packages')"
+                    class="flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-layer-group"></i> Slides & Packages
+                </button>
+                <button id="tab-brand-btn" onclick="switchTab('brand')"
+                    class="flex-1 py-2 text-xs font-bold rounded-lg text-neutral-400 hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-image"></i> Logo & Watermark
+                </button>
+            </div>
+
+            <!-- TAB 1: SLIDE SELECTOR & PACKAGE DATA EDITOR -->
+            <div id="tab-packages" class="flex-1 overflow-y-auto pr-1 space-y-4">
+
+                <!-- Weekly Slide View Switcher -->
+                <div class="space-y-2 bg-neutral-900/90 p-3 rounded-xl border border-neutral-800">
+                    <label class="block text-[11px] font-bold text-brand-300 uppercase tracking-wider">Select Active
+                        Story Slide</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setSlideView('week1')" id="btn-slide-week1"
+                            class="slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-brand-600 border-pink-400 text-white shadow-md">Week
+                            1 (Dec 1-7)</button>
+                        <button onclick="setSlideView('week2')" id="btn-slide-week2"
+                            class="slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white">Week
+                            2 (Dec 8-14)</button>
+                        <button onclick="setSlideView('week3')" id="btn-slide-week3"
+                            class="slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white">Week
+                            3 (Dec 15-21)</button>
+                        <button onclick="setSlideView('week4')" id="btn-slide-week4"
+                            class="slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white">Week
+                            4 (Dec 22-31)</button>
+                    </div>
+                </div>
+
+                <!-- Date Selector Grid -->
+                <div>
+                    <label class="block text-[11px] font-bold text-brand-300 uppercase tracking-wider mb-2">Select
+                        Package Date to Edit (Dec 1 - 31)</label>
+                    <div class="grid grid-cols-7 gap-1.5" id="date-selector-grid">
+                        <!-- JS injects 31 date buttons -->
+                    </div>
+                </div>
+
+                <!-- Active Day Form -->
+                <div id="day-editor-card"
+                    class="bg-neutral-900/90 border border-neutral-800 rounded-xl p-4 space-y-3.5">
+                    <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+                        <span class="text-sm font-bold text-white flex items-center gap-2">
+                            <span id="selected-day-badge"
+                                class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-md shadow-brand-600/40">1</span>
+                            Editing December <span id="selected-day-num">1</span>, 2026
+                        </span>
+                        <span id="selected-day-name"
+                            class="text-xs text-brand-300 font-semibold uppercase tracking-wider">Tuesday</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-neutral-400 mb-1">Package Title</label>
+                        <input type="text" id="edit-title" oninput="updateActiveDay()"
+                            class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                            placeholder="e.g. Medium Acrylic Combo">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-neutral-400 mb-1">Services Included (Line by
+                            Line)</label>
+                        <textarea id="edit-services" oninput="updateActiveDay()" rows="4"
+                            class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 focus:outline-none focus:border-brand-500 font-sans"
+                            placeholder="Meduim Length Nails&#10;Gel Toe Nails&#10;Pedicure (Basic)"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-neutral-400 mb-1">Price Tag (₦)</label>
+                            <input type="text" id="edit-price" oninput="updateActiveDay()"
+                                class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-brand-300 font-bold focus:outline-none focus:border-brand-500"
+                                placeholder="e.g. ₦32,000">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-neutral-400 mb-1">Card Highlight
+                                Style</label>
+                            <select id="edit-status" onchange="updateActiveDay()"
+                                class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="featured">Standard Featured Package</option>
+                                <option value="highlight">Special Highlight (Pink)</option>
+                                <option value="custom">Custom Package Slot</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: BRAND & LOGO WATERMARK SETTINGS -->
+            <div id="tab-brand" class="flex-1 overflow-y-auto pr-1 space-y-4 hidden">
+
+                <!-- Logo & Watermark Upload Section -->
+                <div class="space-y-3 bg-brand-950/60 p-4 rounded-xl border border-brand-800/60">
+                    <h3 class="text-xs font-bold text-brand-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-brand-400"></i> Logo & Watermark Settings
+                    </h3>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-300 font-semibold mb-1">Upload Studio Logo
+                            Image</label>
+                        <input type="file" id="cfg-logo-file" accept="image/*" onchange="handleLogoUpload(event)"
+                            class="w-full text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-500 cursor-pointer bg-neutral-900 border border-neutral-800 rounded-lg p-1">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">Or Paste Direct Logo Image URL</label>
+                        <input type="text" id="cfg-logo-url" oninput="handleLogoUrlInput()" placeholder="https://..."
+                            class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">Header Logo Height</label>
+                            <input type="range" id="cfg-logo-size" min="40" max="180" step="2" value="95"
+                                oninput="renderCalendar()" class="w-full accent-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">Watermark Layout</label>
+                            <select id="cfg-watermark-mode" onchange="renderCalendar()"
+                                class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-2 py-1.5 text-xs text-white">
+                                <option value="center">Single Centered Logo</option>
+                                <option value="tile">Tiled Grid Monogram Pattern</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <div class="flex justify-between text-[11px] text-neutral-400 mb-1">
+                                <span>Watermark Opacity</span>
+                                <span id="opacity-val">0.14</span>
+                            </div>
+                            <input type="range" id="cfg-opacity" min="0" max="0.5" step="0.01" value="0.14"
+                                oninput="renderCalendar()" class="w-full accent-brand-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] text-neutral-400 mb-1">
+                                <span>Watermark Scale</span>
+                                <span id="scale-val">100%</span>
+                            </div>
+                            <input type="range" id="cfg-watermark-scale" min="50" max="250" step="5" value="100"
+                                oninput="renderCalendar()" class="w-full accent-brand-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Customizer -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider">Flyer Text & Info</h3>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">Studio Name</label>
+                        <input type="text" id="cfg-studio-name" oninput="renderCalendar()" value="BeckyNails & More"
+                            class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">Sub-Title / Event Name</label>
+                        <input type="text" id="cfg-tagline" oninput="renderCalendar()"
+                            value="December Calendar Package 2026"
+                            class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">Location Address</label>
+                        <input type="text" id="cfg-address" oninput="renderCalendar()"
+                            value="Before Las Vegas Eatery @ Ashaka Road Kwale, Delta State"
+                            class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">WhatsApp Line</label>
+                            <input type="text" id="cfg-whatsapp" oninput="renderCalendar()" value="08065848114"
+                                class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">Home Service Note</label>
+                            <input type="text" id="cfg-note" oninput="renderCalendar()"
+                                value="NOTE: Extra Charges for Home Service"
+                                class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">Bottom Footer Call-to-Action</label>
+                        <input type="text" id="cfg-footer" oninput="renderCalendar()"
+                            value="Book Your Slot via WhatsApp: 08065848114 — Limited Slots Available for December!"
+                            class="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white">
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- RIGHT PANEL: Live 9:16 Mobile Story Canvas Display (8 Cols) -->
+        <section class="lg:col-span-8 flex flex-col items-center justify-start overflow-x-auto pb-8">
+
+            <!-- Scale Container to preview 1080x1920 in editor -->
+            <div
+                class="scale-[0.48] sm:scale-[0.55] lg:scale-[0.52] xl:scale-[0.58] origin-top my-0 -mb-[900px] sm:-mb-[820px] lg:-mb-[880px] xl:-mb-[760px]">
+
+                <!-- CANVAS CONTAINER FOR 1080x1920 HD PNG EXPORT -->
+                <div id="exportable-canvas"
+                    class="story-canvas rounded-[40px] p-12 border-4 border-brand-900/80 relative overflow-hidden shadow-2xl flex flex-col justify-between">
+
+                    <!-- Background Watermark Pattern Layer -->
+                    <div id="watermark-layer" class="watermark-overlay absolute inset-0 z-0"></div>
+
+                    <!-- Main Content Overlay -->
+                    <div class="relative z-10 flex flex-col h-full justify-between gap-6">
+
+                        <!-- Canvas Header Banner -->
+                        <header
+                            class="text-center relative bg-gradient-to-b from-neutral-950/95 via-brand-950/90 to-neutral-950/95 p-8 rounded-3xl border border-brand-800/60 shadow-xl backdrop-blur-md space-y-3">
+
+                            <!-- Decorative Diamond Badges -->
+                            <div class="absolute top-6 left-8 text-brand-400/50 text-4xl"><i
+                                    class="fa-solid fa-gem"></i></div>
+                            <div class="absolute top-6 right-8 text-brand-400/50 text-4xl"><i
+                                    class="fa-solid fa-gem"></i></div>
+
+                            <!-- Logo Display Container -->
+                            <div class="mx-auto flex items-center justify-center">
+                                <div id="out-logo-container"
+                                    class="rounded-full bg-gradient-to-tr from-brand-700 via-brand-500 to-pink-400 p-2 shadow-xl shadow-brand-600/40 flex items-center justify-center overflow-hidden border-2 border-brand-300/40">
+                                    <div id="out-logo-inner"
+                                        class="w-full h-full bg-neutral-950 rounded-full flex items-center justify-center overflow-hidden">
+                                        <span id="out-logo-fallback"
+                                            class="font-serif italic font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-brand-300 to-white">B</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Brand Titles -->
+                            <div>
+                                <h1 id="out-studio-name"
+                                    class="font-serif text-5xl font-extrabold tracking-tight text-white mb-1">
+                                    BeckyNails & More
+                                </h1>
+                                <div class="font-script text-3xl text-pink-300" id="out-tagline">
+                                    December Calendar Package 2026
+                                </div>
+                            </div>
+
+                            <!-- Active Slide Badge -->
+                            <div
+                                class="inline-block bg-gradient-to-r from-brand-600 to-pink-600 px-8 py-2 rounded-full border border-pink-400/40 shadow-lg">
+                                <span id="out-slide-badge"
+                                    class="text-lg font-extrabold text-white tracking-wider uppercase">DECEMBER 2026 •
+                                    WEEK 1 DEALS (DEC 1 - 7)</span>
+                            </div>
+
+                            <!-- Location & Contact Info -->
+                            <div
+                                class="space-y-1 text-sm text-neutral-200 font-medium pt-2 border-t border-brand-900/60">
+                                <p class="flex items-center justify-center gap-2 text-pink-200">
+                                    <i class="fa-solid fa-location-dot text-brand-400 text-base"></i>
+                                    <span id="out-address">Before Las Vegas Eatery @ Ashaka Road Kwale, Delta
+                                        State</span>
+                                </p>
+                                <p id="out-note" class="text-xs font-bold text-yellow-300 uppercase tracking-wide">
+                                    NOTE: Extra Charges for Home Service
+                                </p>
+                            </div>
+
+                        </header>
+
+                        <!-- PACKAGES CONTAINER (2-COLUMN GRID FOR MAXIMUM TEXT SIZE & LEGIBILITY) -->
+                        <section id="story-packages-container" class="flex-1 grid grid-cols-2 gap-4 my-2 content-start">
+                            <!-- Cards populated dynamically by JS -->
+                        </section>
+
+                        <!-- Call To Action Footer Banner -->
+                        <footer id="out-footer"
+                            class="text-center bg-gradient-to-r from-brand-950 via-brand-700 to-pink-950 text-white font-bold text-xl py-5 px-6 rounded-3xl border border-brand-500/40 shadow-xl tracking-wide leading-relaxed">
+                            Book Your Slot via WhatsApp: 08065848114 — Limited Slots Available for December!
+                        </footer>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- PRESET DATA & ENGINE SCRIPT -->
+    <script>
+        // Preset packages parsed directly from user provided text (including Bride Package & Couple Package)
+        const defaultPackages = [
+            { day: 1, title: "Medium Acrylic Combo", services: ["Meduim Length Nails", "Gel Toe Nails", "Pedicure (Basic)"], price: "₦32,000", status: "featured" },
+            { day: 2, title: "Long Acrylic Elegance", services: ["Long Aclyric Nails", "Aclyric Toe Nails", "Manicure"], price: "₦42,000", status: "featured" },
+            { day: 3, title: "Short Acrylic Starter", services: ["Short Aclyric Nails", "Gel Toe (Without nails)", "Pedicure (Basic)"], price: "₦29,000", status: "featured" },
+            { day: 4, title: "Cluster Lash Special", services: ["Short Aclyric Nails", "Aclyric Toe Nails", "Classic Cluster Lash"], price: "₦29,000", status: "featured" },
+            { day: 5, title: "Acrylic Lash Glam", services: ["Short Aclyric Nails", "Aclyric Toe Nails", "Pedicure (Basic)", "Classic Cluster Lash"], price: "₦41,000", status: "featured" },
+            { day: 6, title: "Jelly Pedi Deluxe", services: ["Meduim Aclyric Nails", "Aclyric Toe Nails", "Hybrid Lash Extensions", "Pedicure (Jelly)"], price: "₦60,000", status: "highlight" },
+            { day: 7, title: "Medium Gel Refresh", services: ["Meduim Gel Polish", "Gel Toe Nails", "Pedicure (Basic)"], price: "₦26,000", status: "featured" },
+            { day: 8, title: "Hybrid Cluster Luxe", services: ["Meduim Gel Nails", "Gel Toe Nails", "Hybrid Cluster Lash"], price: "₦19,000", status: "featured" },
+            { day: 9, title: "Full Beauty Combo", services: ["Meduim Aclyric Nails", "Gel Toe Nails", "Hybrid Lash Extension", "Pedicure & Manicure"], price: "₦61,000", status: "highlight" },
+            { day: 10, title: "Classic Lash Touch", services: ["Meduim Aclyric Nails", "Aclyric Toe Nails", "Classic Lash extension"], price: "₦39,000", status: "featured" },
+            { day: 11, title: "Short Lash Glam", services: ["Short Gel Nails", "Gel Toe Nails", "Classic Cluster Lash"], price: "₦17,000", status: "featured" },
+            { day: 12, title: "Wispy Lash Express", services: ["Short Gel Nails", "Gel Toe Nails", "Wispy Hybrid Cluster Lash"], price: "₦24,000", status: "featured" },
+            { day: 13, title: "Long Hybrid Glam", services: ["Long Nails", "Aclyric Toe Nails", "Hybrid Lash Extension"], price: "₦55,000", status: "featured" },
+            { day: 14, title: "Bride Package", services: ["Medium Aclyric nails", "Aclyric Toe Nail", "Manicure", "Jelly Pedicure"], price: "₦50,000", status: "highlight" },
+            { day: 15, title: "XX-Long Volume Set", services: ["XX Long Aclyric Nails", "Aclyric Toe Nails", "Pedicure", "Volume Lash Extension"], price: "₦74,000", status: "highlight" },
+            { day: 16, title: "Pedi Mani Classic", services: ["Meduim Aclyric Nails", "Aclyric Toe Nails", "Manicure", "Pedicure (Basic)"], price: "₦45,000", status: "featured" },
+            { day: 17, title: "Hybrid Lash Upgrade", services: ["Meduim Gel Nails", "Gel Toe Nails", "Hybrid Lash Extension"], price: "₦32,500", status: "featured" },
+            { day: 18, title: "Long Cluster Glow", services: ["Long Gel Nails", "Gel Toe Nails", "Hybrid Lash (Cluster)"], price: "₦24,500", status: "featured" },
+            { day: 19, title: "Artistic Design Set", services: ["Long Aclyric (with designs)", "Gel Toe Nails", "Jelly Pedicure"], price: "₦50,000", status: "featured" },
+            { day: 20, title: "Hybrid Cluster Pedi", services: ["Medium Aclyric Nails", "Aclyric Toe Nails", "Pedicure (Basic)", "Hybrid Cluster Lash"], price: "₦48,000", status: "featured" },
+            { day: 21, title: "Jelly Pedi Royal", services: ["Long Aclyric Nails", "Aclyric Toe Nails", "Jelly Pedicure"], price: "₦60,000", status: "featured" },
+            { day: 22, title: "Wispy Bottom Lash", services: ["Long Aclyric Nails", "Aclyric Toe Nails", "Wispy Hybrid with bottom Lash"], price: "₦50,000", status: "featured" },
+            { day: 23, title: "Toe & Lash Trio", services: ["Aclyric Toe Nails", "Jelly Pedicure", "Manicure", "Classic Cluster Lash"], price: "₦38,000", status: "featured" },
+            { day: 24, title: "Long Duo Special", services: ["Long Aclyric Nails", "Aclyric Toe Nails"], price: "₦38,000", status: "featured" },
+            { day: 25, title: "Couple Package", services: ["Long Aclyric Nails", "Aclyric Toe Nails", "Classic Lash Extensions", "Basic Pedicure", "Manicure"], price: "₦90,000", status: "highlight" },
+            { day: 26, title: "XXX-Long Hybrid Set", services: ["XXX Long Aclyric Nails", "Aclyric Toe Nails", "Jelly Pedicure", "Hybrid Cluster Lash"], price: "₦68,000", status: "featured" },
+            { day: 27, title: "XXX-Long Cluster Set", services: ["XXX Long Aclyric Nails", "Aclyric Toe Nails", "Manicure", "Wispy Hybrid & Bottom Lash"], price: "₦68,000", status: "featured" },
+            { day: 28, title: "Custom Packages", services: ["Custom Nail & Lash Packages", "Book Your Appointment"], price: "Custom", status: "custom" },
+            { day: 29, title: "Custom Packages", services: ["Custom Nail & Lash Packages", "Book Your Appointment"], price: "Custom", status: "custom" },
+            { day: 30, title: "New Year Eve Glam", services: ["Custom Holiday Packages", "Book Your Slot Early"], price: "Custom", status: "highlight" },
+            { day: 31, title: "New Year Special", services: ["Custom Holiday Packages", "Book Your Slot Early"], price: "Custom", status: "highlight" }
+        ];
+
+        let calendarData = JSON.parse(localStorage.getItem('becky_calendar_2026_v4')) || [...defaultPackages];
+        let activeDayNum = 1;
+        let activeSlideView = 'week1';
+        let logoBase64 = localStorage.getItem('becky_logo_base64_v4') || "";
+
+        const weekDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const START_DAY_OFFSET = 2; // Dec 1, 2026 is Tuesday
+
+        window.onload = function () {
+            renderDateSelectorGrid();
+            selectDay(1);
+            if (logoBase64) {
+                document.getElementById('cfg-logo-url').value = logoBase64;
+            }
+            renderCalendar();
+        };
+
+        function setSlideView(slide) {
+            activeSlideView = slide;
+
+            document.querySelectorAll('.slide-nav-btn').forEach(btn => {
+                btn.className = "slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white";
+            });
+            const activeBtn = document.getElementById(`btn-slide-${slide}`);
+            if (activeBtn) {
+                activeBtn.className = "slide-nav-btn py-2 px-2 text-xs font-bold rounded-lg border bg-brand-600 border-pink-400 text-white shadow-md";
+            }
+
+            renderCalendar();
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    logoBase64 = e.target.result;
+                    localStorage.setItem('becky_logo_base64_v4', logoBase64);
+                    renderCalendar();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleLogoUrlInput() {
+            const url = document.getElementById('cfg-logo-url').value.trim();
+            logoBase64 = url;
+            localStorage.setItem('becky_logo_base64_v4', logoBase64);
+            renderCalendar();
+        }
+
+        function switchTab(tab) {
+            const pkgBtn = document.getElementById('tab-packages-btn');
+            const brandBtn = document.getElementById('tab-brand-btn');
+            const pkgDiv = document.getElementById('tab-packages');
+            const brandDiv = document.getElementById('tab-brand');
+
+            if (tab === 'packages') {
+                pkgBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow transition flex items-center justify-center gap-2";
+                brandBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-neutral-400 hover:text-white transition flex items-center justify-center gap-2";
+                pkgDiv.classList.remove('hidden');
+                brandDiv.classList.add('hidden');
+            } else {
+                brandBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white shadow transition flex items-center justify-center gap-2";
+                pkgBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-neutral-400 hover:text-white transition flex items-center justify-center gap-2";
+                brandDiv.classList.remove('hidden');
+                pkgDiv.classList.add('hidden');
+            }
+        }
+
+        function renderDateSelectorGrid() {
+            const grid = document.getElementById('date-selector-grid');
+            grid.innerHTML = '';
+
+            for (let d = 1; d <= 31; d++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `date-btn-${d}`;
+                btn.onclick = () => selectDay(d);
+                btn.className = `h-8 text-xs font-bold rounded-lg border transition flex items-center justify-center ${activeDayNum === d
+                    ? 'bg-brand-600 border-pink-400 text-white shadow-md shadow-brand-600/40'
+                    : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-brand-500'
+                    }`;
+                btn.innerText = d;
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectDay(d) {
+            activeDayNum = d;
+
+            for (let i = 1; i <= 31; i++) {
+                const b = document.getElementById(`date-btn-${i}`);
+                if (b) {
+                    if (i === d) {
+                        b.className = "h-8 text-xs font-bold rounded-lg border bg-brand-600 border-pink-400 text-white shadow-md shadow-brand-600/40";
+                    } else {
+                        b.className = "h-8 text-xs font-bold rounded-lg border bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-brand-500";
+                    }
+                }
+            }
+
+            const dayOfWeekIndex = (START_DAY_OFFSET + (d - 1)) % 7;
+            document.getElementById('selected-day-badge').innerText = d;
+            document.getElementById('selected-day-num').innerText = d;
+            document.getElementById('selected-day-name').innerText = weekDayNames[dayOfWeekIndex];
+
+            const dayData = calendarData.find(item => item.day === d) || {
+                day: d, title: "Custom Slot", services: ["Custom Package"], price: "Custom", status: "custom"
+            };
+
+            document.getElementById('edit-title').value = dayData.title || '';
+            document.getElementById('edit-services').value = (dayData.services || []).join('\n');
+            document.getElementById('edit-price').value = dayData.price || '';
+            document.getElementById('edit-status').value = dayData.status || 'featured';
+        }
+
+        function updateActiveDay() {
+            const title = document.getElementById('edit-title').value.trim();
+            const servicesText = document.getElementById('edit-services').value;
+            const price = document.getElementById('edit-price').value.trim();
+            const status = document.getElementById('edit-status').value;
+
+            const services = servicesText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+            const index = calendarData.findIndex(item => item.day === activeDayNum);
+            const updatedItem = {
+                day: activeDayNum,
+                title: title || `Day ${activeDayNum}`,
+                services: services.length > 0 ? services : ["Custom Booking Slot"],
+                price: price || "Custom",
+                status: status
+            };
+
+            if (index >= 0) {
+                calendarData[index] = updatedItem;
+            } else {
+                calendarData.push(updatedItem);
+            }
+
+            localStorage.setItem('becky_calendar_2026_v4', JSON.stringify(calendarData));
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            // Render Header Text Attributes
+            document.getElementById('out-studio-name').innerText = document.getElementById('cfg-studio-name').value;
+            document.getElementById('out-tagline').innerText = document.getElementById('cfg-tagline').value;
+            document.getElementById('out-address').innerText = document.getElementById('cfg-address').value;
+            document.getElementById('out-note').innerText = document.getElementById('cfg-note').value;
+            document.getElementById('out-footer').innerText = document.getElementById('cfg-footer').value;
+
+            // Render Header Logo & Topbar Logo Sync
+            const logoSize = document.getElementById('cfg-logo-size').value;
+            const logoContainer = document.getElementById('out-logo-container');
+            const logoInner = document.getElementById('out-logo-inner');
+            const topBarLogo = document.getElementById('top-bar-logo');
+
+            logoContainer.style.width = `${Math.round(logoSize * 1.2)}px`;
+            logoContainer.style.height = `${Math.round(logoSize * 1.2)}px`;
+
+            if (logoBase64) {
+                logoInner.innerHTML = `<img src="${logoBase64}" alt="Studio Logo" class="w-full h-full object-cover">`;
+                topBarLogo.innerHTML = `<img src="${logoBase64}" alt="Studio Logo" class="w-full h-full object-cover">`;
+            } else {
+                logoInner.innerHTML = `<span id="out-logo-fallback" class="font-serif italic font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-brand-300 to-white">B</span>`;
+                topBarLogo.innerText = 'B';
+            }
+
+            // Render Watermark Layer
+            const opacity = document.getElementById('cfg-opacity').value;
+            const scale = document.getElementById('cfg-watermark-scale').value;
+            document.getElementById('opacity-val').innerText = opacity;
+            document.getElementById('scale-val').innerText = `${scale}%`;
+
+            const mode = document.getElementById('cfg-watermark-mode').value;
+            const wmLayer = document.getElementById('watermark-layer');
+
+            if (logoBase64) {
+                if (mode === 'center') {
+                    wmLayer.className = "absolute inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden";
+                    wmLayer.style.backgroundImage = 'none';
+                    const imgWidth = Math.round(650 * (scale / 100));
+                    wmLayer.innerHTML = `<img src="${logoBase64}" class="max-w-[90%] object-contain pointer-events-none select-none transition-all" style="width: ${imgWidth}px; opacity: ${opacity}; filter: drop-shadow(0 0 25px rgba(197, 19, 144, 0.35));">`;
+                } else {
+                    wmLayer.className = "watermark-overlay absolute inset-0 z-0 pointer-events-none";
+                    wmLayer.innerHTML = '';
+                    wmLayer.style.backgroundImage = `url("${logoBase64}")`;
+                    wmLayer.style.backgroundRepeat = 'repeat';
+                    const tileSize = Math.round(180 * (scale / 100));
+                    wmLayer.style.backgroundSize = `${tileSize}px ${tileSize}px`;
+                    wmLayer.style.opacity = opacity;
+                }
+            } else {
+                wmLayer.className = "watermark-overlay absolute inset-0 z-0 pointer-events-none";
+                wmLayer.innerHTML = '';
+                const tileSize = Math.round(220 * (scale / 100));
+                wmLayer.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Ctext x='50%25' y='50%25' fill='%23C51390' fill-opacity='${opacity}' font-family='Playfair Display, serif' font-size='130' font-weight='bold' font-style='italic' text-anchor='middle' dominant-baseline='middle'%3EB%3C/text%3E%3C/svg%3E")`;
+                wmLayer.style.backgroundSize = `${tileSize}px ${tileSize}px`;
+                wmLayer.style.opacity = '1';
+            }
+
+            // Determine Weekly Range
+            let startDay = 1, endDay = 7;
+            const badge = document.getElementById('out-slide-badge');
+
+            if (activeSlideView === 'week1') {
+                startDay = 1; endDay = 7;
+                badge.textContent = "DECEMBER 2026 • WEEK 1 DEALS (DEC 1 - 7)";
+            } else if (activeSlideView === 'week2') {
+                startDay = 8; endDay = 14;
+                badge.textContent = "DECEMBER 2026 • WEEK 2 DEALS (DEC 8 - 14)";
+            } else if (activeSlideView === 'week3') {
+                startDay = 15; endDay = 21;
+                badge.textContent = "DECEMBER 2026 • WEEK 3 DEALS (DEC 15 - 21)";
+            } else if (activeSlideView === 'week4') {
+                startDay = 22; endDay = 31;
+                badge.textContent = "DECEMBER 2026 • HOLIDAY SPECIALS (DEC 22 - 31)";
+            }
+
+            // Render 2-Column Mobile Story Card Grid for Maximum Legibility
+            const container = document.getElementById('story-packages-container');
+            container.innerHTML = '';
+
+            for (let d = startDay; d <= endDay; d++) {
+                const dayData = calendarData.find(item => item.day === d) || {
+                    day: d, title: "Custom Slot", services: ["Custom Package"], price: "Custom", status: "custom"
+                };
+
+                const isHighlightDay = (dayData.status === 'highlight' || d === 14 || d === 25 || d === 31);
+                const dayOfWeekIndex = (START_DAY_OFFSET + (d - 1)) % 7;
+                const dayName = weekDayNames[dayOfWeekIndex];
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-3xl border flex flex-col justify-between gap-2 shadow-xl backdrop-blur-md transition ${isHighlightDay
+                    ? 'bg-gradient-to-b from-brand-900/95 via-brand-950/95 to-neutral-950 border-pink-500/80 shadow-pink-950/40'
+                    : 'bg-neutral-900/90 border-brand-900/60 text-white'
+                    }`;
+
+                let servicesHtml = '';
+                (dayData.services || []).forEach(svc => {
+                    servicesHtml += `<li class="service-text-fix text-pink-100 font-semibold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-pink-400 shrink-0"></span><span class="truncate">${svc}</span></li>`;
+                });
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between border-b border-brand-800/60 pb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10 rounded-xl ${isHighlightDay ? 'bg-pink-500 text-white shadow-md' : 'bg-brand-950 text-pink-300 border border-brand-700/50'} flex flex-col items-center justify-center shrink-0">
+                                    <span class="text-[9px] font-black uppercase tracking-wider leading-none mb-0.5">${dayName.slice(0, 3)}</span>
+                                    <span class="text-base font-black leading-none">${d}</span>
+                                </div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-brand-300">DEC ${d}</span>
+                            </div>
+                            <span class="px-3 py-1 rounded-xl text-base font-black ${isHighlightDay ? 'bg-gradient-to-r from-pink-500 to-brand-500 text-white shadow-md' : 'bg-brand-950 text-yellow-300 border border-brand-700/40'} tracking-tight leading-none">
+                                ${dayData.price}
+                            </span>
+                        </div>
+                        <h3 class="card-title-fix font-extrabold text-yellow-300 tracking-wide pt-1">${dayData.title}</h3>
+                        <ul class="space-y-1 pt-1">${servicesHtml}</ul>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            }
+        }
+
+        function resetDefaults() {
+            if (confirm("Reset all December packages and logo settings back to original defaults?")) {
+                calendarData = [...defaultPackages];
+                logoBase64 = "";
+                localStorage.removeItem('becky_calendar_2026_v4');
+                localStorage.removeItem('becky_logo_base64_v4');
+                document.getElementById('cfg-logo-url').value = "";
+                selectDay(1);
+                setSlideView('week1');
+            }
+        }
+
+        function exportAsImage() {
+            const originalCanvas = document.getElementById('exportable-canvas');
+            const btn = document.getElementById('export-btn');
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating HD PNG...`;
+            btn.disabled = true;
+
+            // Clone element to offscreen wrapper without CSS scaling transform so html2canvas measures true 1080x1920 layout
+            const clone = originalCanvas.cloneNode(true);
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '1080px';
+            container.style.height = '1920px';
+            container.style.transform = 'none';
+            container.style.zIndex = '-9999';
+
+            container.appendChild(clone);
+            document.body.appendChild(container);
+
+            html2canvas(clone, {
+                width: 1080,
+                height: 1920,
+                scale: 1, // Native 1:1 scale on 1080x1920 canvas
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#160412'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `BeckyNails_December_2026_${activeSlideView.toUpperCase()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                document.body.removeChild(container);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("Export Error:", err);
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                alert("Failed to capture story slide image. Please try again.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+
+</html>
